@@ -5,6 +5,8 @@
 #include "config.h"
 #include "ui_elements.h"
 #include "quantum.h"
+#include "dilemma.h"
+#include "bk_pointing_device.h"
 #include <stdio.h>
 
 #include "qp.h"
@@ -308,10 +310,10 @@ void update_layer_name(lv_obj_t *obj) {
 void update_dilemma_status(void) {
     dilemma_lcd_status.mods            = get_mods();
     dilemma_lcd_status.layer           = get_highest_layer(layer_state);
-    dilemma_lcd_status.sniping         = dilemma_get_pointer_sniping_enabled();
-    dilemma_lcd_status.dpi             = dilemma_get_pointer_default_dpi();
-    dilemma_lcd_status.s_dpi           = dilemma_get_pointer_sniping_dpi();
-    dilemma_lcd_status.scrolling       = dilemma_get_pointer_dragscroll_enabled();
+    dilemma_lcd_status.sniping         = bkpd_get_pointer_sniping_enabled();
+    dilemma_lcd_status.dpi             = bkpd_get_pointer_default_dpi();
+    dilemma_lcd_status.s_dpi           = bkpd_get_pointer_sniping_dpi();
+    dilemma_lcd_status.scrolling       = bkpd_get_pointer_dragscroll_enabled();
     dilemma_lcd_status.rgb_enabled     = rgb_matrix_is_enabled();
     dilemma_lcd_status.rgb_effect_mode = rgb_matrix_get_mode();
     dilemma_lcd_status.rgb_val         = rgb_matrix_get_val();
