@@ -13,6 +13,7 @@
 #include "qp_surface.h"
 #include "color.h"
 #include "transactions.h"
+#include "bk_pointing_device.h"
 
 lv_obj_t *ui_screen_base;
 
@@ -293,13 +294,25 @@ void update_layer_name(lv_obj_t *obj) {
                 lv_label_set_text(obj, "LAYER: BASE");
                 break;
             case 1:
-                lv_label_set_text(obj, "LAYER: LOWER");
+                lv_label_set_text(obj, "LAYER: FUNCTION");
                 break;
             case 2:
-                lv_label_set_text(obj, "LAYER: RAISE");
+                lv_label_set_text(obj, "LAYER: NAVIGATION");
                 break;
             case 3:
-                lv_label_set_text(obj, "LAYER: MOUSE");
+                lv_label_set_text(obj, "LAYER: MEDIA");
+                break;
+            case 4:
+                lv_label_set_text(obj, "LAYER: POINTER");
+                break;
+            case 5:
+                lv_label_set_text(obj, "LAYER: NUMERAL");
+                break;
+            case 6:
+                lv_label_set_text(obj, "LAYER: FUNCTION");
+                break;
+            case 7:
+                lv_label_set_text(obj, "LAYER: 7");
                 break;
         }
     }
@@ -308,10 +321,10 @@ void update_layer_name(lv_obj_t *obj) {
 void update_dilemma_status(void) {
     dilemma_lcd_status.mods            = get_mods();
     dilemma_lcd_status.layer           = get_highest_layer(layer_state);
-    dilemma_lcd_status.sniping         = dilemma_get_pointer_sniping_enabled();
-    dilemma_lcd_status.dpi             = dilemma_get_pointer_default_dpi();
-    dilemma_lcd_status.s_dpi           = dilemma_get_pointer_sniping_dpi();
-    dilemma_lcd_status.scrolling       = dilemma_get_pointer_dragscroll_enabled();
+    dilemma_lcd_status.sniping         = bkpd_get_pointer_sniping_enabled();
+    dilemma_lcd_status.dpi             = bkpd_get_pointer_default_dpi();
+    dilemma_lcd_status.s_dpi           = bkpd_get_pointer_sniping_dpi();
+    dilemma_lcd_status.scrolling       = bkpd_get_pointer_dragscroll_enabled();
     dilemma_lcd_status.rgb_enabled     = rgb_matrix_is_enabled();
     dilemma_lcd_status.rgb_effect_mode = rgb_matrix_get_mode();
     dilemma_lcd_status.rgb_val         = rgb_matrix_get_val();

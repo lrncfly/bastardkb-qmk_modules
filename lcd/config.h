@@ -1,6 +1,6 @@
 #pragma once
 
-#define SPLIT_TRANSACTION_IDS_KB RPC_ID_MOUSE_SYNC
+// #define RPC_ID_MOUSE_SYNC
 
 // QP stuff
 #define SPI_SCK_PIN GP22  // as per vik connector
