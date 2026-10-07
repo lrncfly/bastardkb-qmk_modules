@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 #pragma once
 
 #ifdef POINTING_DEVICE_DRIVER_digitizer
@@ -45,7 +45,7 @@ typedef union {
         uint8_t dpi_per_step; // up to 256 config step at a time. should be more than enough
         uint8_t max_dpi_steps: 8; // we can optionally limit the max DPI to a certain amount of bytes
         uint16_t minimum_dpi;
-        uint8_t activate_on_layer; 
+        uint8_t activate_on_layer;
     } __attribute__((packed));
 } bkpd_mode_t;
 
@@ -76,7 +76,20 @@ void bkpd_set_auto_mouse_layer_enabled(bool enabled);
 void bkpd_set_auto_precision_on_mouse_layer_enabled(bool enabled);
 bool bkpd_get_auto_mouse_layer_enabled(void);
 bool bkpd_get_auto_precision_on_mouse_layer_enabled(void);
+bool bkpd_get_pointer_dragscroll_enabled(void);
 void write_bkpd_config_to_eeprom(void);
+void bkpd_set_dragscroll_axis_invert_x(bool invert);
+void bkpd_set_dragscroll_axis_invert_y(bool invert);
+void bkpd_set_dragscroll_dpi(uint16_t dpi);
+bool bkpd_get_dragscroll_axis_invert_x(void);
+bool bkpd_get_dragscroll_axis_invert_y(void);
+uint16_t bkpd_get_dragscroll_dpi(void);
+uint16_t bkpd_get_minimum_default_dpi(void);
+uint16_t bkpd_get_maximum_default_dpi(void);
+uint16_t bkpd_get_default_dpi_config_step(void);
+uint16_t bkpd_get_minimum_sniping_dpi(void);
+uint16_t bkpd_get_maximum_sniping_dpi(void);
+uint16_t bkpd_get_sniping_dpi_config_step(void);
 bool bkpd_is_changing_dpi_settings(void);
 
 // TODO gate this behing community_module_argos_enabled

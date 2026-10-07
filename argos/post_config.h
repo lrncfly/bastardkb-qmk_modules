@@ -48,9 +48,8 @@
 // fail compilation
 #    error "RGBLIGHT_LED_COUNT is not defined"
 #endif
-
-// TODO remove hardcoded 10 layers max value
-#define ARGOS_RGB_MATRIX_ENTRIES RGBLIGHT_LED_COUNT * 10 // up to 10 layers supported
+#define ARGOS_RGB_LAYER_COUNT 10
+#define ARGOS_RGB_MATRIX_ENTRIES (RGBLIGHT_LED_COUNT * ARGOS_RGB_LAYER_COUNT)
 #define ARGOS_SIZE_RGB_MATRIX_KEY_DATA 5
 #define ARGOS_SIZE_RGB_MATRIX_ENTRIES (ARGOS_RGB_MATRIX_ENTRIES * ARGOS_SIZE_RGB_MATRIX_KEY_DATA)
 

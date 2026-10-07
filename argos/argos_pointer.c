@@ -21,8 +21,8 @@ void build_pointing_device_info_command_data(uint8_t **command_data) {
 #endif
     if((*command_data)[0] != pointing_device_type_unknown) {
         // pointing dpi is up to 400+16*200 = 3600, 2 bytes
-        (*command_data)[1] = bkpd_get_pointer_default_dpi() & 0xFF;
-        (*command_data)[2] = (bkpd_get_pointer_default_dpi() >> 8) & 0xFF;
+        (*command_data)[1] = bkpd_mode_get_dpi(MODE_NORMAL) & 0xFF;
+        (*command_data)[2] = (bkpd_mode_get_dpi(MODE_NORMAL) >> 8) & 0xFF;
         // minimum default DPI is 400, 2 bytes
         uint16_t minimum_default_dpi = bkpd_get_minimum_default_dpi();
         (*command_data)[3] = minimum_default_dpi & 0xFF;
@@ -33,8 +33,8 @@ void build_pointing_device_info_command_data(uint8_t **command_data) {
         (*command_data)[5] = default_dpi_config_step & 0xFF;
         (*command_data)[6] = (default_dpi_config_step >> 8) & 0xFF;
         // sniping DPI is up to 200+4*100 = 600, 2 bytes
-        (*command_data)[7] = bkpd_get_pointer_sniping_dpi() & 0xFF;
-        (*command_data)[8] = (bkpd_get_pointer_sniping_dpi() >> 8) & 0xFF;
+        (*command_data)[7] = bkpd_mode_get_dpi(MODE_SNIPING) & 0xFF;
+        (*command_data)[8] = (bkpd_mode_get_dpi(MODE_SNIPING) >> 8) & 0xFF;
         // mininmum sniping dpi is 200, but ue use 2 bytes ju) in case
         uint16_t minimum_sniping_dpi = bkpd_get_minimum_sniping_dpi();
         (*command_data)[9] = minimum_sniping_dpi & 0xFF;
@@ -66,7 +66,7 @@ void argos_set_dpi(uint8_t *command_data) {
         // new dpi is on 2 bytes:
         uint16_t new_dpi = command_data[0] | (command_data[1] << 8);
         // get the old DPI:
-        uint16_t old_dpi = bkpd_get_pointer_default_dpi();
+        uint16_t old_dpi = bkpd_mode_get_dpi(MODE_NORMAL);
         // calculate the difference:
         int16_t difference = new_dpi - old_dpi;
         // calculate how many steps we need, it could be negative
@@ -75,7 +75,7 @@ void argos_set_dpi(uint8_t *command_data) {
         // apply the steps one by one
         bool forward = new_steps > 0;
         for (int i = 0; i < abs(new_steps); i++) {
-            bkpd_cycle_pointer_default_dpi(forward);
+            bkpd_mode_cycle_dpi(MODE_NORMAL, forward);
         }
 #endif
 }
@@ -85,7 +85,7 @@ void argos_set_sniping_dpi(uint8_t *command_data) {
         // new dpi is on 2 bytes:
         uint16_t new_dpi = command_data[0] | (command_data[1] << 8);
         // get the old DPI:
-        uint16_t old_dpi = bkpd_get_pointer_sniping_dpi();
+        uint16_t old_dpi = bkpd_mode_get_dpi(MODE_SNIPING);
         // calculate the difference:
         int16_t difference = new_dpi - old_dpi;
         // calculate how many steps we need, it could be negative
@@ -94,7 +94,7 @@ void argos_set_sniping_dpi(uint8_t *command_data) {
         // apply the steps one by one
         bool forward = new_steps > 0;
         for (int i = 0; i < abs(new_steps); i++) {
-            bkpd_cycle_pointer_sniping_dpi(forward);
+            bkpd_mode_cycle_dpi(MODE_SNIPING, forward);
         }
 #endif
 }

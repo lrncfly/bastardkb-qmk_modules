@@ -52,11 +52,6 @@ int8_t changing_dpi_settings_for_mode = -1;
 
 /**
  * \brief Set the value of `config` from EEPROM.
- *
- * Note that `is_dragscroll_enabled` and `is_sniping_enabled` are purposefully
- * ignored since we do not want to persist this state to memory.  In practice,
- * this state is always written to maximize write-performances.  Therefore, we
- * explicitly set them to `false` in this function.
  */
 static void read_bkpd_config_from_eeprom(void) {
 // TODO: replace with per-module memory management
@@ -69,11 +64,6 @@ static void read_bkpd_config_from_eeprom(void) {
 
 /**
  * \brief Save the value of `config` to eeprom.
- *
- * Note that all values are written verbatim, including whether drag-scroll
- * and/or sniper mode are enabled.  `read_bkpd_config_from_eeprom(…)`
- * resets these 2 values to `false` since it does not make sense to persist
- * these across reboots of the board.
  */
 void write_bkpd_config_to_eeprom(void) {
 // TODO: replace with per-module memory management
@@ -231,6 +221,34 @@ bool bkpd_get_auto_precision_on_mouse_layer_enabled(void) {
     return g_bkpd_config.auto_precision_on_mouse_layer_enabled;
 }
 
+bool bkpd_get_pointer_dragscroll_enabled(void) {
+    return bkpd_mode_get_active_id() == MODE_DRAGSCROLL;
+}
+
+uint16_t bkpd_get_minimum_default_dpi(void) {
+    return bkpd_mode_get_minimum_dpi(MODE_NORMAL);
+}
+
+uint16_t bkpd_get_maximum_default_dpi(void) {
+    return bkpd_mode_get_max_dpi(MODE_NORMAL);
+}
+
+uint16_t bkpd_get_default_dpi_config_step(void) {
+    return bkpd_mode_get_dpi_per_step(MODE_NORMAL);
+}
+
+uint16_t bkpd_get_minimum_sniping_dpi(void) {
+    return bkpd_mode_get_minimum_dpi(MODE_SNIPING);
+}
+
+uint16_t bkpd_get_maximum_sniping_dpi(void) {
+    return bkpd_mode_get_max_dpi(MODE_SNIPING);
+}
+
+uint16_t bkpd_get_sniping_dpi_config_step(void) {
+    return bkpd_mode_get_dpi_per_step(MODE_SNIPING);
+}
+
 /**
  * \brief Process pointing modes
  */
@@ -279,7 +297,7 @@ bool process_record_bk_pointing_device(uint16_t keycode, keyrecord_t *record) {
                 printf("bkpd_mode_set_active: MODE_NORMAL\n");
                 bkpd_mode_release(mode);
             }
-        } 
+        }
         // toggle keycode
         else {
             if(record->event.pressed) {
@@ -390,7 +408,7 @@ layer_state_t layer_state_set_bk_pointing_device(layer_state_t state) {
     if (layer_state_cmp(state, AUTO_MOUSE_DEFAULT_LAYER) && \
             g_bkpd_config.auto_precision_on_mouse_layer_enabled) {
         bkpd_mode_set_active(MODE_SNIPING);
-    } else { 
+    } else {
         // first, deactivate auto sniping mode (legacy)
         if(g_bkpd_config.auto_precision_on_mouse_layer_enabled){
             bkpd_mode_release(MODE_SNIPING);
@@ -441,9 +459,9 @@ bool digitizer_task_kb(digitizer_t *const digitizer_state) {
             if(bkpd_mode_get_active_id() != MODE_SNIPING) {
                 // disable finger taps for anything else than normal mode
                 if(bkpd_mode_get_active_id() != MODE_NORMAL) {
-                    digitizer_state->contacts[first_contact_id].tip = false; 
+                    digitizer_state->contacts[first_contact_id].tip = false;
                 }
-                
+
                 report_mouse_t report = {0};
                 // x and y reports from the digitizer don't have DPI applied yet, so we need to manually scale it
                 uint16_t dpi = bkpd_mode_get_dpi(bkpd_mode_get_active_id());
@@ -463,7 +481,7 @@ bool digitizer_task_kb(digitizer_t *const digitizer_state) {
                         pointing_device_task_auto_mouse(report);
                     }
                 }
-                first_contact = false; 
+                first_contact = false;
 
                 last_report_scaled.contacts[first_contact_id].x = x;
                 last_report_scaled.contacts[first_contact_id].y = y;

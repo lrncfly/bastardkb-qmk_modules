@@ -10,21 +10,20 @@
 
 static argos_rgb_t argos_rgb_entries[ARGOS_RGB_MATRIX_ENTRIES];
 
+// Keymaps can override this to seed Argos with their own per-layer palette.
+__attribute__((weak)) RGB argos_rgb_default_layer_color(uint8_t layer) {
+    HSV hsv = (HSV){layer * 360 / ARGOS_RGB_LAYER_COUNT, 255, 255};
+    return hsv_to_rgb(hsv);
+}
+
 void argos_rgb_init(void) {
     // // layer 0 is transparent
     for (int i = 0; i < RGBLIGHT_LED_COUNT; i++) {
         argos_rgb_entries[i] = (argos_rgb_t){0, 0, 0, false, false, false};
     }
     // default: per-layer rgb
-    // hardcoded 10 layers max value
-    for (int layer = 1; layer < 10; layer++) {
-        const uint8_t brightness = rgb_matrix_get_val();
-        // pick 10 different colors, easier to do in HSV
-        HSV hsv = (HSV){layer * 360 / 10, 255, 255}; // max brightness, we will convert later
-        RGB rgb = hsv_to_rgb(hsv);
-        rgb.r   = (rgb.r * brightness) / RGB_MATRIX_MAXIMUM_BRIGHTNESS;
-        rgb.g   = (rgb.g * brightness) / RGB_MATRIX_MAXIMUM_BRIGHTNESS;
-        rgb.b   = (rgb.b * brightness) / RGB_MATRIX_MAXIMUM_BRIGHTNESS;
+    for (int layer = 1; layer < ARGOS_RGB_LAYER_COUNT; layer++) {
+        RGB rgb = argos_rgb_default_layer_color(layer);
         for (int i = 0; i < RGBLIGHT_LED_COUNT; i++) {
             argos_rgb_entries[layer * RGBLIGHT_LED_COUNT + i] = (argos_rgb_t){rgb.r, rgb.g, rgb.b, false, true, true};
         }
@@ -86,14 +85,33 @@ bool rgb_matrix_indicators_advanced_argos(uint8_t led_min, uint8_t led_max) {
 }
 
 /*
- * Returns the RGB color of the first underglow LED of the layer
- * We assume that the whole underglow is the same color (default behaviour)
- */
-void argos_rgb_get_layer_color(uint8_t layer, RGB *rgb) {
+* Returns the RGB color of the first underglow LED of the layer
+* We assume that the whole underglow is the same color (default behaviour)
+*/
+bool argos_rgb_get_layer_color(uint8_t layer, RGB *rgb) {
+    if (layer >= ARGOS_RGB_LAYER_COUNT) {
+        return false;
+    }
+
     // grab the first underglow LED of the layer
     const uint16_t     index = layer * RGBLIGHT_LED_COUNT;
     const argos_rgb_t *entry = &argos_rgb_entries[index];
-    *rgb                     = (RGB){entry->r, entry->g, entry->b};
+    if (!entry->custom || (entry->on && entry->passthrough)) {
+        return false;
+    }
+    if (!entry->on) {
+        *rgb = (RGB){0, 0, 0};
+        return true;
+    }
+
+    const uint8_t brightness = rgb_matrix_get_val();
+    rgb->r = (entry->r * brightness) / RGB_MATRIX_MAXIMUM_BRIGHTNESS;
+    rgb->g = (entry->g * brightness) / RGB_MATRIX_MAXIMUM_BRIGHTNESS;
+    rgb->b = (entry->b * brightness) / RGB_MATRIX_MAXIMUM_BRIGHTNESS;
+    if (rgb->r > RGB_MATRIX_MAXIMUM_BRIGHTNESS - 40) rgb->r = RGB_MATRIX_MAXIMUM_BRIGHTNESS - 40;
+    if (rgb->g > RGB_MATRIX_MAXIMUM_BRIGHTNESS - 40) rgb->g = RGB_MATRIX_MAXIMUM_BRIGHTNESS - 40;
+    if (rgb->b > RGB_MATRIX_MAXIMUM_BRIGHTNESS - 40) rgb->b = RGB_MATRIX_MAXIMUM_BRIGHTNESS - 40;
+    return true;
 }
 
 // The rgb module code is called BEFORE the KB code, so we need to override the KB code.
