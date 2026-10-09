@@ -10,6 +10,27 @@
 
 static argos_rgb_t argos_rgb_entries[ARGOS_RGB_MATRIX_ENTRIES];
 
+static bool argos_rgb_led_is_underglow(uint16_t led_index) {
+#    ifdef RGB_MATRIX_ENABLE
+    if (led_index >= RGB_MATRIX_LED_COUNT) {
+        return false;
+    }
+    return (g_led_config.flags[led_index] & LED_FLAG_UNDERGLOW) != 0;
+#    else
+    return true;
+#    endif
+}
+
+static bool argos_rgb_first_underglow_led(uint16_t *led_index) {
+    for (uint16_t i = 0; i < RGBLIGHT_LED_COUNT; i++) {
+        if (argos_rgb_led_is_underglow(i)) {
+            *led_index = i;
+            return true;
+        }
+    }
+    return false;
+}
+
 // Keymaps can override this to seed Argos with their own per-layer palette.
 __attribute__((weak)) RGB argos_rgb_default_layer_color(uint8_t layer) {
     HSV hsv = (HSV){layer * 360 / ARGOS_RGB_LAYER_COUNT, 255, 255};
@@ -17,14 +38,16 @@ __attribute__((weak)) RGB argos_rgb_default_layer_color(uint8_t layer) {
 }
 
 void argos_rgb_init(void) {
-    // // layer 0 is transparent
-    for (int i = 0; i < RGBLIGHT_LED_COUNT; i++) {
+    for (uint16_t i = 0; i < ARGOS_RGB_MATRIX_ENTRIES; i++) {
         argos_rgb_entries[i] = (argos_rgb_t){0, 0, 0, false, false, false};
     }
-    // default: per-layer rgb
+
     for (int layer = 1; layer < ARGOS_RGB_LAYER_COUNT; layer++) {
         RGB rgb = argos_rgb_default_layer_color(layer);
-        for (int i = 0; i < RGBLIGHT_LED_COUNT; i++) {
+        for (uint16_t i = 0; i < RGBLIGHT_LED_COUNT; i++) {
+            if (!argos_rgb_led_is_underglow(i)) {
+                continue;
+            }
             argos_rgb_entries[layer * RGBLIGHT_LED_COUNT + i] = (argos_rgb_t){rgb.r, rgb.g, rgb.b, false, true, true};
         }
     }
@@ -84,17 +107,18 @@ bool rgb_matrix_indicators_advanced_argos(uint8_t led_min, uint8_t led_max) {
     return true;
 }
 
-/*
-* Returns the RGB color of the first underglow LED of the layer
-* We assume that the whole underglow is the same color (default behaviour)
-*/
+// Returns the color of the first underglow LED as the layer's representative color.
 bool argos_rgb_get_layer_color(uint8_t layer, RGB *rgb) {
     if (layer >= ARGOS_RGB_LAYER_COUNT) {
         return false;
     }
 
-    // grab the first underglow LED of the layer
-    const uint16_t     index = layer * RGBLIGHT_LED_COUNT;
+    uint16_t led_index;
+    if (!argos_rgb_first_underglow_led(&led_index)) {
+        return false;
+    }
+
+    const uint16_t     index = layer * RGBLIGHT_LED_COUNT + led_index;
     const argos_rgb_t *entry = &argos_rgb_entries[index];
     if (!entry->custom || (entry->on && entry->passthrough)) {
         return false;
