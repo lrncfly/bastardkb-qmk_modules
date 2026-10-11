@@ -1,7 +1,8 @@
 #pragma once
 
-#undef SPLIT_TRANSACTION_IDS_KB
-#define SPLIT_TRANSACTION_IDS_KB RPC_ID_MOUSE_SYNC
+#ifndef COMMUNITY_MODULE_ARGOS_ENABLE
+#    define SPLIT_TRANSACTION_IDS_KB RPC_ID_MOUSE_SYNC
+#endif
 
 // QP stuff
 #define SPI_SCK_PIN GP22  // as per vik connector
