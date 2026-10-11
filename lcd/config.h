@@ -1,5 +1,6 @@
 #pragma once
 
+#undef SPLIT_TRANSACTION_IDS_KB
 #define SPLIT_TRANSACTION_IDS_KB RPC_ID_MOUSE_SYNC
 
 // QP stuff
